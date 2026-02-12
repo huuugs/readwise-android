@@ -3,7 +3,7 @@ package com.readwise.core.model
 /**
  * 书籍格式枚举
  */
-enum class BookFormat(@JvmField val displayName: String, val extension: String) {
+enum class BookFormat(val displayName: String, @JvmName("extension") val fileExtension: String) {
     PDF("Portable Document Format", "pdf"),
     EPUB("EPUB", "epub"),
     MOBI("MOBI", "mobi"),
@@ -21,7 +21,7 @@ enum class BookFormat(@JvmField val displayName: String, val extension: String) 
 
     companion object {
         fun fromExtension(extension: String): BookFormat {
-            return values().find { it.extension.equals(extension, ignoreCase = true) } ?: UNKNOWN
+            return values().find { it.fileExtension.equals(extension, ignoreCase = true) } ?: UNKNOWN
         }
 
         fun fromMimeType(mimeType: String): BookFormat {
