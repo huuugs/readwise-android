@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">ReadWise</string>
+    <string name="app_name_zh">智阅</string>
+    
+    <!-- Navigation -->
+    <string name="nav_bookshelf">书架</string>
+    <string name="nav_discovery">发现</string>
+    <string name="nav_dictionary">词典</string>
+    <string name="nav_settings">设置</string>
+    
+    <!-- Bookshelf -->
+    <string name="bookshelf_empty">书架为空</string>
+    <string name="bookshelf_import">导入书籍</string>
+    <string name="bookshelf_search">搜索书籍</string>
+    <string name="bookshelf_sort">排序</string>
+    <string name="bookshelf_view">视图</string>
+    
+    <!-- Reader -->
+    <string name="reader_toc">目录</string>
+    <string name="reader_bookmark">书签</string>
+    <string name="reader_search">搜索</string>
+    <string name="reader_settings">阅读设置</string>
+    <string name="reader_xray">X-ray</string>
+    <string name="reader_ai_summary">AI总结</string>
+    
+    <!-- Dictionary -->
+    <string name="dict_search_hint">输入单词查询</string>
+    <string name="dict_history">历史记录</string>
+    <string name="dict_favorites">收藏</string>
+    <string name="dict_vocabulary">生词本</string>
+    
+    <!-- Settings -->
+    <string name="settings_reading">阅读设置</string>
+    <string name="settings_dictionary">词典设置</string>
+    <string name="settings_ai">AI设置</string>
+    <string name="settings_about">关于</string>
+    
+    <!-- Common -->
+    <string name="confirm">确定</string>
+    <string name="cancel">取消</string>
+    <string name="delete">删除</string>
+    <string name="save">保存</string>
+    <string name="loading">加载中…</string>
+    <string name="error">出错了</string>
+    <string name="retry">重试</string>
+</resources>
