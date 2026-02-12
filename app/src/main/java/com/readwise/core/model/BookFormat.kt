@@ -3,8 +3,8 @@ package com.readwise.core.model
 /**
  * 书籍格式枚举
  */
-enum class BookFormat(val displayName: String, val extension: String) {
-    PDF("PDF", "pdf"),
+enum class BookFormat(val formatName: String, val extension: String) {
+    PDF("Portable Document Format", "pdf"),
     EPUB("EPUB", "epub"),
     MOBI("MOBI", "mobi"),
     AZW3("AZW3", "azw3"),
