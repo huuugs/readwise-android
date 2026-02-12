@@ -97,9 +97,9 @@ class UnifiedReaderViewModel @Inject constructor(
     private fun getChapterList(): List<com.readwise.engine.common.UnifiedChapter> {
         val count = unifiedEngine.getChapterCount()
         return (0 until count).map { index ->
-            viewModelScope.launch {
+            try {
                 unifiedEngine.getChapter(index)
-            }.catch (e: Exception) {
+            } catch (e: Exception) {
                 com.readwise.engine.common.UnifiedChapter(
                     index = index,
                     title = "Chapter ${index + 1}",

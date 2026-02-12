@@ -450,7 +450,6 @@ fun ReaderSettingsPanel(
                         Text(align.displayName)
                     }
                 }
-                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 

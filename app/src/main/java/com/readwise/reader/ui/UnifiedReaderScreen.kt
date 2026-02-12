@@ -190,7 +190,7 @@ fun ReaderContent(
             item {
                 PdfPageView(
                     pageNumber = chapter + 1,
-                    textColor = textColor
+                    textColor = textColor,
                     modifier = Modifier.fillMaxSize()
                 )
             }

@@ -144,6 +144,6 @@ data class DocumentInfo(
     val fileSize: Long = 0,
     val chapterCount: Int = 0,
     val language: String? = null,
-    val publisher: String? = null
+    val publisher: String? = null,
     val identifier: String? = null
 )
