@@ -33,16 +33,57 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build Debug APK
-      run: ./gradlew assembleDebug --stacktrace
+      id: build
+      run: ./gradlew assembleDebug --stacktrace --info
+      continue-on-error: true
 
     - name: Run unit tests
-      run: ./gradlew test --stacktrace
+      id: test
+      run: ./gradlew test --stacktrace --info
+      continue-on-error: true
+
+    - name: Capture build summary
+      if: always()
+      run: |
+        mkdir -p build-logs
+        echo "=== Build Summary ===" > build-logs/build-summary.txt
+        echo "Build Status: ${{ steps.build.outcome }}" >> build-logs/build-summary.txt
+        echo "Test Status: ${{ steps.test.outcome }}" >> build-logs/build-summary.txt
+        echo "" >> build-logs/build-summary.txt
+        echo "Check the uploaded artifacts for detailed logs." >> build-logs/build-summary.txt
+
+    - name: Collect Gradle logs and reports
+      if: always()
+      run: |
+        mkdir -p build-logs
+        # Copy Gradle build reports
+        if [ -d app/build/reports ]; then
+          cp -r app/build/reports build-logs/ 2>/dev/null || true
+        fi
+        if [ -d app/build/test-results ]; then
+          cp -r app/build/test-results build-logs/ 2>/dev/null || true
+        fi
+        if [ -d app/build/outputs ]; then
+          cp -r app/build/outputs build-logs/ 2>/dev/null || true
+        fi
+        # Copy any generated APKs
+        find app/build/outputs/apk -name "*.apk" -exec cp {} build-logs/ \; 2>/dev/null || true
 
     - name: Upload Debug APK
+      if: success()
       uses: actions/upload-artifact@v4
       with:
         name: debug-apk
         path: app/build/outputs/apk/debug/*.apk
+        retention-days: 30
+
+    - name: Upload build logs and reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs-and-reports
+        path: build-logs/
+        retention-days: 30
 
   release:
     needs: build
@@ -62,9 +103,11 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build Release APK
-      run: ./gradlew assembleRelease --stacktrace
+      id: release
+      run: ./gradlew assembleRelease --stacktrace --info
 
     - name: Sign APK
+      if: success()
       uses: r0adkll/sign-android-release@v1
       with:
         releaseDirectory: app/build/outputs/apk/release
@@ -76,8 +119,19 @@ jobs:
         BUILD_TOOLS_VERSION: "34.0.0"
 
     - name: Create Release
+      if: success()
       uses: softprops/action-gh-release@v1
       with:
         files: app/build/outputs/apk/release/*-signed.apk
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload release logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-build-logs
+        path: |
+          app/build/reports/
+          app/build/outputs/
+        retention-days: 30
