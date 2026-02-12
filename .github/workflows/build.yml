@@ -9,16 +9,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: 'temurin'
-        
+
     - name: Cache Gradle packages
       uses: actions/cache@v3
       with:
@@ -32,20 +32,26 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build with Gradle
-      run: ./gradlew build --stacktrace
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug --stacktrace
 
-    - name: Run tests
+    - name: Run unit tests
       run: ./gradlew test --stacktrace
+
+    - name: Upload Debug APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: debug-apk
+        path: app/build/outputs/apk/debug/*.apk
 
   release:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
@@ -57,7 +63,7 @@ jobs:
 
     - name: Build Release APK
       run: ./gradlew assembleRelease --stacktrace
-      
+
     - name: Sign APK
       uses: r0adkll/sign-android-release@v1
       with:
@@ -68,7 +74,7 @@ jobs:
         keyPassword: ${{ secrets.KEY_PASSWORD }}
       env:
         BUILD_TOOLS_VERSION: "34.0.0"
-        
+
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
