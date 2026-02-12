@@ -34,23 +34,23 @@ jobs:
 
     - name: Build Debug APK
       id: build
-      run: ./gradlew assembleDebug --stacktrace --info
-      continue-on-error: true
+      run: ./gradlew assembleDebug --stacktrace
+
+    - name: Check APK exists
+      if: success()
+      run: |
+        APK_PATH=$(find app/build/outputs/apk/debug -name "*.apk" | head -1)
+        if [ -z "$APK_PATH" ]; then
+          echo "❌ ERROR: No APK found in app/build/outputs/apk/debug/"
+          echo "Build completed but no APK was generated!"
+          exit 1
+        fi
+        echo "✅ APK found at: $APK_PATH"
+        ls -lh "$APK_PATH"
 
     - name: Run unit tests
       id: test
-      run: ./gradlew test --stacktrace --info
-      continue-on-error: true
-
-    - name: Capture build summary
-      if: always()
-      run: |
-        mkdir -p build-logs
-        echo "=== Build Summary ===" > build-logs/build-summary.txt
-        echo "Build Status: ${{ steps.build.outcome }}" >> build-logs/build-summary.txt
-        echo "Test Status: ${{ steps.test.outcome }}" >> build-logs/build-summary.txt
-        echo "" >> build-logs/build-summary.txt
-        echo "Check the uploaded artifacts for detailed logs." >> build-logs/build-summary.txt
+      run: ./gradlew test --stacktrace
 
     - name: Collect Gradle logs and reports
       if: always()
@@ -68,6 +68,14 @@ jobs:
         fi
         # Copy any generated APKs
         find app/build/outputs/apk -name "*.apk" -exec cp {} build-logs/ \; 2>/dev/null || true
+
+        # Create summary
+        echo "=== Build Summary ===" > build-logs/build-summary.txt
+        echo "Build Status: ${{ steps.build.outcome }}" >> build-logs/build-summary.txt
+        echo "Test Status: ${{ steps.test.outcome }}" >> build-logs/build-summary.txt
+        echo "" >> build-logs/build-summary.txt
+        echo "Files in build-logs:" >> build-logs/build-summary.txt
+        ls -lh build-logs/ >> build-logs/build-summary.txt
 
     - name: Upload Debug APK
       if: success()
@@ -103,11 +111,9 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build Release APK
-      id: release
-      run: ./gradlew assembleRelease --stacktrace --info
+      run: ./gradlew assembleRelease --stacktrace
 
     - name: Sign APK
-      if: success()
       uses: r0adkll/sign-android-release@v1
       with:
         releaseDirectory: app/build/outputs/apk/release
@@ -119,7 +125,6 @@ jobs:
         BUILD_TOOLS_VERSION: "34.0.0"
 
     - name: Create Release
-      if: success()
       uses: softprops/action-gh-release@v1
       with:
         files: app/build/outputs/apk/release/*-signed.apk
