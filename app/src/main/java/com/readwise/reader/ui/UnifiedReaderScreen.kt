@@ -557,7 +557,7 @@ private val TextAlign.displayName: String
         TextAlign.Center -> "Center"
         TextAlign.End -> "Right"
     }
-}
+
 
 /**
  * X-ray Quick Panel

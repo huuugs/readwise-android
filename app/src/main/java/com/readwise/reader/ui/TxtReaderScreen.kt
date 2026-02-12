@@ -468,6 +468,8 @@ fun ReaderSettingsPanel(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Vertical Mode")
                 }
+            }
+        },
                 }
             }
         },
