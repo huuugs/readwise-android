@@ -1,23 +1,41 @@
 package com.readwise.core.model
 
 /**
- * 书籍格式枚举
+ * 书籍格式
  */
-sealed class BookFormat(val displayName: String, val fileExtension: String) {
-    object PDF : BookFormat("Portable Document Format", "pdf")
-    object EPUB : BookFormat("EPUB", "epub")
-    object MOBI : BookFormat("MOBI", "mobi")
-    object AZW3 : BookFormat("AZW3", "azw3")
-    object TXT : BookFormat("TXT", "txt")
-    object DOCX : BookFormat("DOCX", "docx")
-    object HTML : BookFormat("HTML", "html")
-    object CHM : BookFormat("CHM", "chm")
-    object CBZ : BookFormat("CBZ", "cbz")
-    object CBR : BookFormat("CBR", "cbr")
-    object FB2 : BookFormat("FB2", "fb2")
-    object DJVU : BookFormat("DJVU", "djvu")
-    object RTF : BookFormat("RTF", "rtf")
-    object UNKNOWN : BookFormat("未知", "")
+sealed class BookFormat(val fileExtension: String) {
+    object PDF : BookFormat("pdf")
+    object EPUB : BookFormat("epub")
+    object MOBI : BookFormat("mobi")
+    object AZW3 : BookFormat("azw3")
+    object TXT : BookFormat("txt")
+    object DOCX : BookFormat("docx")
+    object HTML : BookFormat("html")
+    object CHM : BookFormat("chm")
+    object CBZ : BookFormat("cbz")
+    object CBR : BookFormat("cbr")
+    object FB2 : BookFormat("fb2")
+    object DJVU : BookFormat("djvu")
+    object RTF : BookFormat("rtf")
+    object UNKNOWN : BookFormat("")
+
+    val displayName: String
+        get() = when (this) {
+            PDF -> "Portable Document Format"
+            EPUB -> "EPUB"
+            MOBI -> "MOBI"
+            AZW3 -> "AZW3"
+            TXT -> "TXT"
+            DOCX -> "DOCX"
+            HTML -> "HTML"
+            CHM -> "CHM"
+            CBZ -> "CBZ"
+            CBR -> "CBR"
+            FB2 -> "FB2"
+            DJVU -> "DJVU"
+            RTF -> "RTF"
+            UNKNOWN -> "未知"
+        }
 
     companion object {
         fun fromExtension(extension: String): BookFormat {
