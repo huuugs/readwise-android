@@ -108,9 +108,9 @@ dependencies {
     // Logging
     implementation 'com.jakewharton.timber:timber:5.0.0'
 
-    // PDF
-    implementation 'com.github.barteksc:android-pdf-viewer:3.2.0-beta.1'
-    implementation 'com.github.barteksc:pdfium-android:1.9.0'
+    // PDF - TODO: Replace with maintained library
+    // implementation 'com.github.barteksc:android-pdf-viewer:3.2.0-beta.1'
+    // implementation 'com.github.barteksc:pdfium-android:1.9.0'
 
     // EPUB
     implementation 'org.readium.kotlin-toolkit:readium-shared:2.4.0'
