@@ -470,9 +470,6 @@ fun ReaderSettingsPanel(
                 }
             }
         },
-                }
-            }
-        },
         confirmButton = {
             TextButton(onClick = onDismiss) {
                 Text("Close")
