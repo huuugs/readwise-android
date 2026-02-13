@@ -3,41 +3,41 @@ package com.readwise.core.model
 /**
  * 书籍格式
  */
-sealed class BookFormat(val fileExtension: String) {
-    object PDF : BookFormat("pdf")
-    object EPUB : BookFormat("epub")
-    object MOBI : BookFormat("mobi")
-    object AZW3 : BookFormat("azw3")
-    object TXT : BookFormat("txt")
-    object DOCX : BookFormat("docx")
-    object HTML : BookFormat("html")
-    object CHM : BookFormat("chm")
-    object CBZ : BookFormat("cbz")
-    object CBR : BookFormat("cbr")
-    object FB2 : BookFormat("fb2")
-    object DJVU : BookFormat("djvu")
-    object RTF : BookFormat("rtf")
-    object UNKNOWN : BookFormat("")
-
+class BookFormat private constructor(val fileExtension: String) {
     val displayName: String
-        get() = when (this) {
-            PDF -> "Portable Document Format"
-            EPUB -> "EPUB"
-            MOBI -> "MOBI"
-            AZW3 -> "AZW3"
-            TXT -> "TXT"
-            DOCX -> "DOCX"
-            HTML -> "HTML"
-            CHM -> "CHM"
-            CBZ -> "CBZ"
-            CBR -> "CBR"
-            FB2 -> "FB2"
-            DJVU -> "DJVU"
-            RTF -> "RTF"
-            UNKNOWN -> "未知"
+        get() = when (fileExtension) {
+            "pdf" -> "Portable Document Format"
+            "epub" -> "EPUB"
+            "mobi" -> "MOBI"
+            "azw3" -> "AZW3"
+            "txt" -> "TXT"
+            "docx" -> "DOCX"
+            "html" -> "HTML"
+            "chm" -> "CHM"
+            "cbz" -> "CBZ"
+            "cbr" -> "CBR"
+            "fb2" -> "FB2"
+            "djvu" -> "DJVU"
+            "rtf" -> "RTF"
+            else -> "未知"
         }
 
     companion object {
+        val PDF = BookFormat("pdf")
+        val EPUB = BookFormat("epub")
+        val MOBI = BookFormat("mobi")
+        val AZW3 = BookFormat("azw3")
+        val TXT = BookFormat("txt")
+        val DOCX = BookFormat("docx")
+        val HTML = BookFormat("html")
+        val CHM = BookFormat("chm")
+        val CBZ = BookFormat("cbz")
+        val CBR = BookFormat("cbr")
+        val FB2 = BookFormat("fb2")
+        val DJVU = BookFormat("djvu")
+        val RTF = BookFormat("rtf")
+        val UNKNOWN = BookFormat("")
+
         fun fromExtension(extension: String): BookFormat {
             return values.find { it.fileExtension.equals(extension, ignoreCase = true) } ?: UNKNOWN
         }
