@@ -5,7 +5,6 @@ import android.net.Uri
 import android.webkit.MimeTypeMap
 import java.io.File
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * 书籍格式检测器
@@ -13,28 +12,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class BookFormatDetector @Inject constructor(
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) {
-
-    /**
-     * 支持的格式枚举
-     */
-    enum class Format {
-        PDF,
-        EPUB,
-        MOBI,
-        AZW3,
-        TXT,
-        DOCX,
-        HTML,
-        CHM,
-        CBZ,
-        CBR,
-        FB2,
-        DJVU,
-        RTF,
-        UNKNOWN
-    }
 
     /**
      * 支持的 MIME 类型映射
@@ -44,27 +23,27 @@ class BookFormatDetector @Inject constructor(
     /**
      * 从文件路径检测格式
      */
-    fun detectFormat(path: String): Format {
+    fun detectFormat(path: String): BookFormat {
         val file = File(path)
         if (!file.exists()) {
-            return Format.UNKNOWN
+            return BookFormat.UNKNOWN
         }
 
         // 先按扩展名检测
         val extension = file.extension.lowercase()
         val formatByExtension = when (extension) {
-            "pdf" -> Format.PDF
-            "epub" -> Format.EPUB
-            "mobi", "azw", "azw3" -> Format.MOBI
-            "txt" -> Format.TXT
-            "rtf" -> Format.TXT
-            "html", "htm" -> Format.TXT
-            "md" -> Format.TXT
-            "markdown" -> Format.TXT
-            else -> Format.UNKNOWN
+            "pdf" -> BookFormat.PDF
+            "epub" -> BookFormat.EPUB
+            "mobi", "azw", "azw3" -> BookFormat.MOBI
+            "txt" -> BookFormat.TXT
+            "rtf" -> BookFormat.TXT
+            "html", "htm" -> BookFormat.TXT
+            "md" -> BookFormat.TXT
+            "markdown" -> BookFormat.TXT
+            else -> BookFormat.UNKNOWN
         }
 
-        if (formatByExtension != Format.UNKNOWN) {
+        if (formatByExtension != BookFormat.UNKNOWN) {
             return formatByExtension
         }
 
@@ -72,45 +51,45 @@ class BookFormatDetector @Inject constructor(
         val mimeType = context.contentResolver.getType(Uri.parse(path))
         if (mimeType != null) {
             val formatByMime = when {
-                "application/pdf" -> Format.PDF
-                "application/x-mobipocket-ebook" -> Format.MOBI
-                "application/epub+zip" -> Format.EPUB
-                "text/plain" -> Format.TXT
-                "text/html" -> Format.TXT
-                "application/xhtml+xml" -> Format.TXT
+                "application/pdf" -> BookFormat.PDF
+                "application/x-mobipocket-ebook" -> BookFormat.MOBI
+                "application/epub+zip" -> BookFormat.EPUB
+                "text/plain" -> BookFormat.TXT
+                "text/html" -> BookFormat.TXT
+                "application/xhtml+xml" -> BookFormat.TXT
                 else -> null
             }
             if (formatByMime != null) {
                 return formatByMime
             }
         }
-        return Format.UNKNOWN
+        return BookFormat.UNKNOWN
     }
 
     /**
      * 从 Uri 检测格式（通过 ContentResolver）
      */
-    fun detectFormatFromUri(uri: Uri): Format {
+    fun detectFormatFromUri(uri: Uri): BookFormat {
         val mimeType = context.contentResolver.getType(uri)
         val extension = getFileNameExtension(context, uri)
 
         // 先按 MIME 类型
         mimeType?.let { mime ->
             when {
-                "application/pdf" -> return Format.PDF
-                "application/x-mobipocket-ebook" -> return Format.MOBI
-                "application/epub+zip" -> return Format.EPUB
-                "text/plain" -> return Format.TXT
+                "application/pdf" -> return BookFormat.PDF
+                "application/x-mobipocket-ebook" -> return BookFormat.MOBI
+                "application/epub+zip" -> return BookFormat.EPUB
+                "text/plain" -> return BookFormat.TXT
             }
         }
 
         // 再按扩展名
         return when (extension?.lowercase()) {
-            "pdf" -> Format.PDF
-            "epub" -> Format.EPUB
-            "mobi", "azw", "azw3" -> Format.MOBI
-            "txt" -> Format.TXT
-            else -> Format.UNKNOWN
+            "pdf" -> BookFormat.PDF
+            "epub" -> BookFormat.EPUB
+            "mobi", "azw", "azw3" -> BookFormat.MOBI
+            "txt" -> BookFormat.TXT
+            else -> BookFormat.UNKNOWN
         }
     }
 
@@ -131,49 +110,43 @@ class BookFormatDetector @Inject constructor(
     /**
      * 检查是否为支持的格式
      */
-    fun isSupportedFormat(format: Format): Boolean {
-        return format != Format.UNKNOWN
+    fun isSupportedFormat(format: BookFormat): Boolean {
+        return format != BookFormat.UNKNOWN
     }
 
     /**
      * 获取格式显示名称
      */
-    fun getFormatName(format: Format): String {
+    fun getFormatName(format: BookFormat): String {
         return when (format) {
-            Format.PDF -> "PDF Document"
-            Format.EPUB -> "EPUB eBook"
-            Format.MOBI -> "MOBI eBook"
-            Format.TXT -> "Plain Text"
-            Format.UNKNOWN -> "Unknown Format"
+            BookFormat.PDF -> "PDF Document"
+            BookFormat.EPUB -> "EPUB eBook"
+            BookFormat.MOBI -> "MOBI eBook"
+            BookFormat.TXT -> "Plain Text"
+            BookFormat.UNKNOWN -> "Unknown Format"
             else -> "Other"
         }
     }
 
     /**
-     * 从扩展名获取格式（用于兼容性）
+     * 获取文件扩展名
      */
-    fun fromExtension(extension: String): Format {
+    fun fromExtension(extension: String): BookFormat {
         return when (extension.lowercase()) {
-            "pdf" -> Format.PDF
-            "epub" -> Format.EPUB
-            "mobi", "azw", "azw3" -> Format.MOBI
-            "txt" -> Format.TXT
-            "rtf" -> Format.TXT
-            "html", "htm" -> Format.TXT
-            "md" -> Format.TXT
-            "markdown" -> Format.TXT
-            else -> Format.UNKNOWN
-        }
-    }
-
-    /**
-     * 从格式名称字符串获取格式（用于从数据库恢复）
-     */
-    fun fromFormatName(formatName: String): Format {
-        return try {
-            Format.valueOf(formatName)
-        } catch (e: IllegalArgumentException) {
-            Format.UNKNOWN
+            "pdf" -> BookFormat.PDF
+            "epub" -> BookFormat.EPUB
+            "mobi" -> BookFormat.MOBI
+            "azw3" -> BookFormat.AZW3
+            "txt" -> BookFormat.TXT
+            "docx" -> BookFormat.DOCX
+            "html" -> BookFormat.HTML
+            "chm" -> BookFormat.CHM
+            "cbz" -> BookFormat.CBZ
+            "cbr" -> BookFormat.CBR
+            "fb2" -> BookFormat.FB2
+            "djvu" -> BookFormat.DJVU
+            "rtf" -> BookFormat.RTF
+            else -> BookFormat.UNKNOWN
         }
     }
 }
