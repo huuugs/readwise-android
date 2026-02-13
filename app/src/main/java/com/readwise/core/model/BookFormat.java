@@ -3,11 +3,28 @@ package com.readwise.core.model;
 /**
  * 书籍格式
  */
-public class BookFormat {
-    private final String fileExtension;
+public enum BookFormat {
+    PDF("pdf", "Portable Document Format"),
+    EPUB("epub", "EPUB"),
+    MOBI("mobi", "MOBI"),
+    AZW3("azw3", "AZW3"),
+    TXT("txt", "TXT"),
+    DOCX("docx", "DOCX"),
+    HTML("html", "HTML"),
+    CHM("chm", "CHM"),
+    CBZ("cbz", "CBZ"),
+    CBR("cbr", "CBR"),
+    FB2("fb2", "FB2"),
+    DJVU("djvu", "DJVU"),
+    RTF("rtf", "RTF"),
+    UNKNOWN("", "未知");
 
-    BookFormat(String fileExtension) {
+    private final String fileExtension;
+    private final String displayName;
+
+    BookFormat(String fileExtension, String displayName) {
         this.fileExtension = fileExtension;
+        this.displayName = displayName;
     }
 
     public String getFileExtension() {
@@ -15,39 +32,11 @@ public class BookFormat {
     }
 
     public String getDisplayName() {
-        if (this instanceof PDF) return "Portable Document Format";
-        if (this instanceof EPUB) return "EPUB";
-        if (this instanceof MOBI) return "MOBI";
-        if (this instanceof AZW3) return "AZW3";
-        if (this instanceof TXT) return "TXT";
-        if (this instanceof DOCX) return "DOCX";
-        if (this instanceof HTML) return "HTML";
-        if (this instanceof CHM) return "CHM";
-        if (this instanceof CBZ) return "CBZ";
-        if (this instanceof CBR) return "CBR";
-        if (this instanceof FB2) return "FB2";
-        if (this instanceof DJVU) return "DJVU";
-        if (this instanceof RTF) return "RTF";
-        return "未知";
+        return displayName;
     }
 
-    public static final BookFormat PDF = new BookFormat("pdf") {};
-    public static final BookFormat EPUB = new BookFormat("epub") {};
-    public static final BookFormat MOBI = new BookFormat("mobi") {};
-    public static final BookFormat AZW3 = new BookFormat("azw3") {};
-    public static final BookFormat TXT = new BookFormat("txt") {};
-    public static final BookFormat DOCX = new BookFormat("docx") {};
-    public static final BookFormat HTML = new BookFormat("html") {};
-    public static final BookFormat CHM = new BookFormat("chm") {};
-    public static final BookFormat CBZ = new BookFormat("cbz") {};
-    public static final BookFormat CBR = new BookFormat("cbr") {};
-    public static final BookFormat FB2 = new BookFormat("fb2") {};
-    public static final BookFormat DJVU = new BookFormat("djvu") {};
-    public static final BookFormat RTF = new BookFormat("rtf") {};
-    public static final BookFormat UNKNOWN = new BookFormat("") {};
-
     public static BookFormat fromExtension(String extension) {
-        for (BookFormat format : new BookFormat[]{PDF, EPUB, MOBI, AZW3, TXT, DOCX, HTML, CHM, CBZ, CBR, FB2, DJVU, RTF}) {
+        for (BookFormat format : values()) {
             if (format.fileExtension.equalsIgnoreCase(extension)) {
                 return format;
             }
