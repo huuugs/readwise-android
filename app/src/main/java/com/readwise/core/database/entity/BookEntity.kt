@@ -4,7 +4,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.readwise.core.database.converter.ListConverter
-import com.readwise.core.model.BookFormat
 
 /**
  * 书籍实体

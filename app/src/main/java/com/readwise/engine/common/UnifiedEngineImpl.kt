@@ -1,7 +1,6 @@
 package com.readwise.engine.common
 
 import android.graphics.Bitmap
-import com.readwise.core.model.BookFormat
 import com.readwise.engine.epub.EpubChapter
 import com.readwise.engine.epub.EpubEngine
 import com.readwise.engine.epub.EpubSearchResult
@@ -33,12 +32,12 @@ class UnifiedEngineImpl @Inject constructor(
     private val formatDetector: BookFormatDetector
 ) : UnifiedEngine {
 
-    private var currentFormat: BookFormat = BookFormat.UNKNOWN
+    private var currentFormat: BookFormatDetector.Format = BookFormatDetector.Format.UNKNOWN
     private var currentDocument: Any? = null
 
     override suspend fun openDocument(
         path: String,
-        format: BookFormat?
+        format: BookFormatDetector.Format?
     ): UnifiedDocument {
         val file = File(path)
         if (!file.exists()) {
@@ -47,7 +46,7 @@ class UnifiedEngineImpl @Inject constructor(
 
         // Detect or use provided format
         val detectedFormat = format ?: formatDetector.detectFormat(path)
-        if (detectedFormat == BookFormat.UNKNOWN) {
+        if (detectedFormat == BookFormatDetector.Format.UNKNOWN) {
             throw IllegalArgumentException("Unsupported format: ${file.extension}")
         }
 
@@ -55,10 +54,10 @@ class UnifiedEngineImpl @Inject constructor(
 
         // Open with appropriate engine
         currentDocument = when (detectedFormat) {
-            BookFormat.PDF -> pdfEngine.openDocument(path)
-            BookFormat.EPUB -> epubEngine.openDocument(path)
-            BookFormat.TXT,
-            BookFormat.MOBI -> txtEngine.openDocument(path, null)
+            BookFormatDetector.Format.PDF -> pdfEngine.openDocument(path)
+            BookFormatDetector.Format.EPUB -> epubEngine.openDocument(path)
+            BookFormatDetector.Format.TXT,
+            BookFormatDetector.Format.MOBI -> txtEngine.openDocument(path, null)
             else -> throw IllegalArgumentException("Unsupported format: $detectedFormat")
         }
 
@@ -67,17 +66,17 @@ class UnifiedEngineImpl @Inject constructor(
 
     override fun getChapterCount(): Int {
         return when (currentFormat) {
-            BookFormat.PDF -> pdfEngine.getPageCount()
-            BookFormat.EPUB -> epubEngine.getChapterCount()
-            BookFormat.TXT,
-            BookFormat.MOBI -> txtEngine.getChapterCount()
+            BookFormatDetector.Format.PDF -> pdfEngine.getPageCount()
+            BookFormatDetector.Format.EPUB -> epubEngine.getChapterCount()
+            BookFormatDetector.Format.TXT,
+            BookFormatDetector.Format.MOBI -> txtEngine.getChapterCount()
             else -> 0
         }
     }
 
     override suspend fun getChapter(chapterIndex: Int): UnifiedChapter {
         return when (currentFormat) {
-            BookFormat.PDF -> {
+            BookFormatDetector.Format.PDF -> {
                 val text = pdfEngine.extractText(chapterIndex)
                 UnifiedChapter(
                     index = chapterIndex,
@@ -86,12 +85,12 @@ class UnifiedEngineImpl @Inject constructor(
                     plainText = text
                 )
             }
-            BookFormat.EPUB -> {
+            BookFormatDetector.Format.EPUB -> {
                 val epubChapter = epubEngine.getChapter(chapterIndex)
                 epubChapter.toUnifiedChapter()
             }
-            BookFormat.TXT,
-            BookFormat.MOBI -> {
+            BookFormatDetector.Format.TXT,
+            BookFormatDetector.Format.MOBI -> {
                 val txtChapter = txtEngine.getChapter(chapterIndex)
                 txtChapter.toUnifiedChapter()
             }
@@ -106,14 +105,14 @@ class UnifiedEngineImpl @Inject constructor(
 
     override suspend fun getOutline(): List<OutlineItem> {
         return when (currentFormat) {
-            BookFormat.PDF -> {
+            BookFormatDetector.Format.PDF -> {
                 pdfEngine.getOutline().map { it.toUnifiedOutline() }
             }
-            BookFormat.EPUB -> {
+            BookFormatDetector.Format.EPUB -> {
                 epubEngine.getTableOfContents().map { it.toUnifiedOutline() }
             }
-            BookFormat.TXT,
-            BookFormat.MOBI -> {
+            BookFormatDetector.Format.TXT,
+            BookFormatDetector.Format.MOBI -> {
                 // TXT doesn't have TOC, generate from chapters
                 val count = txtEngine.getChapterCount()
                 (0 until count).map { index ->
@@ -129,14 +128,14 @@ class UnifiedEngineImpl @Inject constructor(
 
     override suspend fun search(query: String): Flow<SearchResult> {
         return when (currentFormat) {
-            BookFormat.PDF -> {
+            BookFormatDetector.Format.PDF -> {
                 pdfEngine.search(query).map { it.toUnifiedSearchResult() }
             }
-            BookFormat.EPUB -> {
+            BookFormatDetector.Format.EPUB -> {
                 epubEngine.search(query).map { it.toUnifiedSearchResult() }
             }
-            BookFormat.TXT,
-            BookFormat.MOBI -> {
+            BookFormatDetector.Format.TXT,
+            BookFormatDetector.Format.MOBI -> {
                 txtEngine.search(query).map { it.toUnifiedSearchResult() }
             }
             else -> flowOf()
@@ -145,32 +144,32 @@ class UnifiedEngineImpl @Inject constructor(
 
     override suspend fun getCover(): Bitmap? {
         return when (currentFormat) {
-            BookFormat.EPUB -> epubEngine.getCover()
+            BookFormatDetector.Format.EPUB -> epubEngine.getCover()
             else -> null
         }
     }
 
     override fun getDocumentInfo(): DocumentInfo? {
         return when (currentFormat) {
-            BookFormat.PDF -> {
+            BookFormatDetector.Format.PDF -> {
                 pdfEngine.getDocumentInfo()?.let { info ->
                     DocumentInfo(
                         path = info.path,
                         title = info.title ?: "Unknown",
                         author = info.author,
-                        format = BookFormat.PDF,
+                        format = BookFormatDetector.Format.PDF,
                         fileSize = File(info.path).length(),
                         chapterCount = info.pageCount
                     )
                 }
             }
-            BookFormat.EPUB -> {
+            BookFormatDetector.Format.EPUB -> {
                 epubEngine.getDocumentInfo()?.let { info ->
                     DocumentInfo(
                         path = info.path,
                         title = info.title,
                         author = info.author,
-                        format = BookFormat.EPUB,
+                        format = BookFormatDetector.Format.EPUB,
                         fileSize = File(info.path).length(),
                         chapterCount = info.chapterCount,
                         language = info.language,
@@ -179,13 +178,13 @@ class UnifiedEngineImpl @Inject constructor(
                     )
                 }
             }
-            BookFormat.TXT,
-            BookFormat.MOBI -> {
+            BookFormatDetector.Format.TXT,
+            BookFormatDetector.Format.MOBI -> {
                 txtEngine.getDocumentInfo()?.let { info ->
                     DocumentInfo(
                         path = info.path,
                         title = info.title,
-                        format = BookFormat.TXT,
+                        format = BookFormatDetector.Format.TXT,
                         fileSize = info.fileSize,
                         chapterCount = info.chapterCount
                     )
@@ -197,27 +196,27 @@ class UnifiedEngineImpl @Inject constructor(
 
     override fun close() {
         when (currentFormat) {
-            BookFormat.PDF -> pdfEngine.close()
-            BookFormat.EPUB -> epubEngine.close()
-            BookFormat.TXT,
-            BookFormat.MOBI -> txtEngine.close()
+            BookFormatDetector.Format.PDF -> pdfEngine.close()
+            BookFormatDetector.Format.EPUB -> epubEngine.close()
+            BookFormatDetector.Format.TXT,
+            BookFormatDetector.Format.MOBI -> txtEngine.close()
             else -> {}
         }
         currentDocument = null
-        currentFormat = BookFormat.UNKNOWN
+        currentFormat = BookFormatDetector.Format.UNKNOWN
     }
 
     override fun isOpened(): Boolean {
         return when (currentFormat) {
-            BookFormat.PDF -> pdfEngine.isOpened()
-            BookFormat.EPUB -> epubEngine.isOpened()
-            BookFormat.TXT,
-            BookFormat.MOBI -> txtEngine.isOpened()
+            BookFormatDetector.Format.PDF -> pdfEngine.isOpened()
+            BookFormatDetector.Format.EPUB -> epubEngine.isOpened()
+            BookFormatDetector.Format.TXT,
+            BookFormatDetector.Format.MOBI -> txtEngine.isOpened()
             else -> false
         }
     }
 
-    override fun getFormat(): BookFormat = currentFormat
+    override fun getFormat(): BookFormatDetector.Format = currentFormat
 
     // Extension functions for converting format-specific models to unified models
 
@@ -237,7 +236,7 @@ class UnifiedEngineImpl @Inject constructor(
                         path = it.path,
                         title = it.title,
                         author = it.author,
-                        format = BookFormat.EPUB,
+                        format = BookFormatDetector.Format.EPUB,
                         chapterCount = it.chapterCount,
                         language = it.language,
                         publisher = it.publisher,
@@ -252,7 +251,7 @@ class UnifiedEngineImpl @Inject constructor(
                 override fun getMetadata() = DocumentInfo(
                     path = document.getMetadata().path,
                     title = document.getMetadata().title,
-                    format = BookFormat.TXT,
+                    format = BookFormatDetector.Format.TXT,
                     fileSize = document.getMetadata().fileSize,
                     chapterCount = document.getMetadata().chapterCount
                 )

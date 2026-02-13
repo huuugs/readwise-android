@@ -1,6 +1,7 @@
 package com.readwise.core.model
 
 import android.os.Parcelable
+import com.readwise.engine.common.BookFormatDetector
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -13,7 +14,7 @@ data class Book(
     val author: String,
     val coverPath: String?,
     val filePath: String,
-    val format: BookFormat,
+    val format: BookFormatDetector.Format,
     val fileSize: Long,
     val addedTime: Long = System.currentTimeMillis(),
     val lastReadTime: Long? = null,

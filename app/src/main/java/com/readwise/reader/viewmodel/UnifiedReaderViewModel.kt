@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.readwise.core.model.Book
-import com.readwise.core.model.BookFormat
 import com.readwise.core.model.ReadPosition
 import com.readwise.core.repository.BookRepository
 import com.readwise.engine.common.ReaderLayoutConfig
@@ -212,7 +211,7 @@ class UnifiedReaderViewModel @Inject constructor(
 data class UnifiedReaderUiState(
     val isLoading: Boolean = true,
     val book: Book? = null,
-    val format: BookFormat = BookFormat.UNKNOWN,
+    val format: BookFormatDetector.Format = BookFormatDetector.Format.UNKNOWN,
     val currentChapterIndex: Int = 0,
     val chapterCount: Int? = null,
     val showOutline: Boolean = false,

@@ -5,6 +5,7 @@ import android.net.Uri
 import android.webkit.MimeTypeMap
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * 书籍格式检测器
@@ -12,7 +13,7 @@ import javax.inject.Inject
  */
 @Singleton
 class BookFormatDetector @Inject constructor(
-    @ApplicationContext private val context: Context
+    private val context: Context
 ) {
 
     /**
@@ -145,6 +146,34 @@ class BookFormatDetector @Inject constructor(
             Format.TXT -> "Plain Text"
             Format.UNKNOWN -> "Unknown Format"
             else -> "Other"
+        }
+    }
+
+    /**
+     * 从扩展名获取格式（用于兼容性）
+     */
+    fun fromExtension(extension: String): Format {
+        return when (extension.lowercase()) {
+            "pdf" -> Format.PDF
+            "epub" -> Format.EPUB
+            "mobi", "azw", "azw3" -> Format.MOBI
+            "txt" -> Format.TXT
+            "rtf" -> Format.TXT
+            "html", "htm" -> Format.TXT
+            "md" -> Format.TXT
+            "markdown" -> Format.TXT
+            else -> Format.UNKNOWN
+        }
+    }
+
+    /**
+     * 从格式名称字符串获取格式（用于从数据库恢复）
+     */
+    fun fromFormatName(formatName: String): Format {
+        return try {
+            Format.valueOf(formatName)
+        } catch (e: IllegalArgumentException) {
+            Format.UNKNOWN
         }
     }
 }

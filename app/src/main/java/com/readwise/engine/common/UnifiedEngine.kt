@@ -1,6 +1,5 @@
 package com.readwise.engine.common
 
-import com.readwise.core.model.BookFormat
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -16,7 +15,7 @@ interface UnifiedEngine {
      */
     suspend fun openDocument(
         path: String,
-        format: BookFormat? = null
+        format: BookFormatDetector.Format? = null
     ): UnifiedDocument
 
     /**
@@ -62,7 +61,7 @@ interface UnifiedEngine {
     /**
      * 获取当前格式
      */
-    fun getFormat(): BookFormat
+    fun getFormat(): BookFormatDetector.Format
 }
 
 /**
@@ -140,7 +139,7 @@ data class DocumentInfo(
     val path: String,
     val title: String,
     val author: String? = null,
-    val format: BookFormat,
+    val format: BookFormatDetector.Format,
     val fileSize: Long = 0,
     val chapterCount: Int = 0,
     val language: String? = null,

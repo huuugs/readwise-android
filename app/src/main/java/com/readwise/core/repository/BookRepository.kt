@@ -5,8 +5,8 @@ import com.readwise.core.database.dao.ReadingPositionDao
 import com.readwise.core.database.entity.BookEntity
 import com.readwise.core.database.entity.ReadingPositionEntity
 import com.readwise.core.model.Book
-import com.readwise.core.model.BookFormat
 import com.readwise.core.model.ReadPosition
+import com.readwise.engine.common.BookFormatDetector
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.io.File
@@ -20,14 +20,15 @@ import javax.inject.Singleton
 @Singleton
 class BookRepository @Inject constructor(
     private val bookDao: BookDao,
-    private val readingPositionDao: ReadingPositionDao
+    private val readingPositionDao: ReadingPositionDao,
+    private val formatDetector: BookFormatDetector
 ) {
     /**
      * 获取所有书籍
      */
     fun getAllBooks(): Flow<List<Book>> {
         return bookDao.getAllBooks().map { entities ->
-            entities.map { it.toBook() }
+            entities.map { it.toBook(formatDetector = formatDetector) }
         }
     }
 
@@ -36,7 +37,7 @@ class BookRepository @Inject constructor(
      */
     fun getRecentBooks(limit: Int = 20): Flow<List<Book>> {
         return bookDao.getRecentBooks(limit).map { entities ->
-            entities.map { it.toBook() }
+            entities.map { it.toBook(formatDetector = formatDetector) }
         }
     }
 
@@ -45,7 +46,7 @@ class BookRepository @Inject constructor(
      */
     fun getBooksByCategory(category: String): Flow<List<Book>> {
         return bookDao.getBooksByCategory(category).map { entities ->
-            entities.map { it.toBook() }
+            entities.map { it.toBook(formatDetector = formatDetector) }
         }
     }
 
@@ -55,7 +56,7 @@ class BookRepository @Inject constructor(
     suspend fun getBookById(bookId: String): Book? {
         val book = bookDao.getBookById(bookId) ?: return null
         val position = readingPositionDao.getPosition(bookId)
-        return book.toBook(position?.toReadPosition())
+        return book.toBook(position?.toReadPosition(), formatDetector)
     }
 
     /**
@@ -63,7 +64,7 @@ class BookRepository @Inject constructor(
      */
     fun getBookByIdFlow(bookId: String): Flow<Book?> {
         return bookDao.getBookByIdFlow(bookId).map { entity ->
-            entity?.toBook()
+            entity?.toBook(formatDetector = formatDetector)
         }
     }
 
@@ -71,7 +72,7 @@ class BookRepository @Inject constructor(
      * 搜索书籍
      */
     suspend fun searchBooks(query: String): List<Book> {
-        return bookDao.searchBooks(query).map { it.toBook() }
+        return bookDao.searchBooks(query).map { it.toBook(formatDetector = formatDetector) }
     }
 
     /**
@@ -80,7 +81,7 @@ class BookRepository @Inject constructor(
     suspend fun importBook(filePath: String): Book {
         val file = File(filePath)
         val extension = file.extension
-        val format = BookFormat.fromExtension(extension)
+        val format = formatDetector.fromExtension(extension)
 
         val bookId = System.currentTimeMillis().toString()
 
@@ -96,7 +97,7 @@ class BookRepository @Inject constructor(
         )
 
         bookDao.insertBook(entity)
-        return entity.toBook()
+        return entity.toBook(formatDetector = formatDetector)
     }
 
     /**
@@ -169,15 +170,19 @@ class BookRepository @Inject constructor(
 
 /**
  * 扩展函数：将 Entity 转换为领域模型
+ * 需要传入 formatDetector 实例
  */
-private fun BookEntity.toBook(position: ReadPosition? = null): Book {
+private fun BookEntity.toBook(
+    position: ReadPosition? = null,
+    formatDetector: BookFormatDetector
+): Book {
     return Book(
         id = id,
         title = title,
         author = author,
         coverPath = coverPath,
         filePath = filePath,
-        format = BookFormat.valueOf(format),
+        format = formatDetector.fromFormatName(format),
         fileSize = fileSize,
         addedTime = addedTime,
         lastReadTime = lastReadTime,

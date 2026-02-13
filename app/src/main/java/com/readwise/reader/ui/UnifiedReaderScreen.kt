@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.readwise.ai.model.XRayEntity
 import com.readwise.ai.model.XRayEntityType
-import com.readwise.core.model.BookFormat
+import com.readwise.engine.common.BookFormatDetector
 import com.readwise.engine.common.OutlineItem
 import com.readwise.engine.common.ReaderLayoutConfig
 import com.readwise.engine.common.TextAlign
@@ -189,7 +189,7 @@ fun ReaderContent(
 
         // PDF 特殊处理（内容在 UI 层渲染）
         if (currentChapter.content.isEmpty() &&
-            uiState.format == BookFormat.PDF) {
+            uiState.format == BookFormatDetector.Format.PDF) {
             item {
                 PdfPageView(
                     pageNumber = chapter + 1,
