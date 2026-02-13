@@ -3,7 +3,7 @@ package com.readwise.core.model;
 /**
  * 书籍格式
  */
-public sealed class BookFormat {
+public class BookFormat {
     private final String fileExtension;
 
     BookFormat(String fileExtension) {
