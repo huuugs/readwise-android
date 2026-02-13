@@ -131,7 +131,7 @@ fun ReaderContent(
     chapter: Int?,
     chapterList: List<com.readwise.engine.common.UnifiedChapter>,
     config: ReaderLayoutConfig,
-    format: com.readwise.core.model.BookFormat,
+    format: BookFormatDetector.Format,
     modifier: Modifier = Modifier
 ) {
     val bgColor = Color(config.backgroundColor)
@@ -290,7 +290,7 @@ fun PdfPageView(
 @Composable
 fun ReaderTopBar(
     title: String,
-    format: BookFormat,
+    format: BookFormatDetector.Format,
     onNavigateBack: () -> Unit,
     onTocClick: () -> Unit,
     onXRayClick: () -> Unit,
